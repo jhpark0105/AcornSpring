@@ -14,6 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/attendance")
+@CrossOrigin(origins = "http://localhost:3000") // React 서버 주소
 public class AttendanceController {
 
     @Autowired
