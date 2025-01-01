@@ -125,7 +125,7 @@ public class NoticeProcess {
 
 		// 절대 경로로 디렉토리 설정
 		Path uploadPath = Paths.get(noticeUploadDir).toAbsolutePath(); // noticeUploadDir은 application.properties에서 정의됨
-
+		
 		// 디렉토리가 없으면 생성
 		if (Files.notExists(uploadPath)) {
 			System.out.println("Creating upload directory: " + uploadPath); // 디버깅 로그 추가
@@ -164,7 +164,6 @@ public class NoticeProcess {
 			newData.setNoticeNo(noticeRepository.findMaxNoticeNo() != null
 					? noticeRepository.findMaxNoticeNo() + 1 : 1);
 			newData.setNoticeImagePath(uploadFile(image)); // 업로드된 이미지 경로 설정
-			System.out.println("Uploaded Image Path: " + newData.getNoticeImagePath());
 
 			// 공지 저장
 			noticeRepository.save(newData);
