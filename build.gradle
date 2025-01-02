@@ -53,6 +53,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
+	// cloudinary
+	implementation 'com.cloudinary:cloudinary-http5:2.0.0'
 }
 
 tasks.named('test') {

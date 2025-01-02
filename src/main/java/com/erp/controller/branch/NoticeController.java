@@ -7,16 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.erp.dto.NoticeDto;
@@ -81,6 +72,10 @@ public class NoticeController {
 //		// WebSocket으로 알림 전송
 //		messagingTemplate.convertAndSend("/topic/notice", alarmContent);
 
+		if ((boolean) response.getOrDefault("isSuccess", false)) {
+			response.put("uploadedImageUrl", dto.getNoticeImagePath()); // 업로드된 이미지 URL 추가
+		}
+
 		return response;
 	}
 
@@ -101,5 +96,13 @@ public class NoticeController {
 		map.put("isSuccess", true);
 		
 		return map;
+	}
+
+	@ExceptionHandler(Exception.class)
+	public Map<String, Object> handleExceptions(Exception e) {
+		Map<String, Object> errorResponse = new HashMap<>();
+		errorResponse.put("isSuccess", false);
+		errorResponse.put("message", e.getMessage());
+		return errorResponse;
 	}
 }
