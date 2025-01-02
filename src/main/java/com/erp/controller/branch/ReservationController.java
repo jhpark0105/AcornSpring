@@ -88,11 +88,16 @@ public class ReservationController {
 
         // 고객명을 가져오기
         String customerName = reservationDto.getCustomerName();
+        String memberName = reservationDto.getMemberName();
+        String reservationDate = reservationDto.getReservationDate();
+        String reservationTime = reservationDto.getReservationTime();
 
-
+//        // 알림 메시지 생성
+//        String alarmContent = customerName + "님의 예약이 등록되었습니다!";
         // 알림 메시지 생성
-        String alarmContent = customerName + "님의 예약이 등록되었습니다!";
-
+        String alarmContent = customerName + "님의 예약이 등록되었습니다!\n"
+                + "담당 디자이너: " + memberName + "\n"
+                + "예약 일시: " + reservationDate +" "+ reservationTime;
         // 알림 생성 및 DB 저장
         Alarm alarm = com.erp.entity.Alarm.builder()
                 .content(alarmContent)
