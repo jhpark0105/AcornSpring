@@ -185,10 +185,32 @@ public class NoticeProcess {
 	//공지 삭제
 	@Transactional
 	public String deleteNotice(int noticeNo) {
-		if(!noticeRepository.existsById(noticeNo)) {
+		if (!noticeRepository.existsById(noticeNo)) {
 			return "해당 번호의 공지가 존재하지 않습니다.";
 		}
 
+		// 공지 가져오기
+		Notice notice = noticeRepository.findById(noticeNo)
+				.orElseThrow(() -> new NoSuchElementException("해당 번호의 공지가 존재하지 않습니다."));
+
+		// 파일 삭제 로직 추가
+		if (notice.getNoticeImagePath() != null) {
+			try {
+				Path filePath = Paths.get(noticeUploadDir).toAbsolutePath()
+						.resolve(Paths.get(notice.getNoticeImagePath().replace("/uploads/notice/", "")));
+
+				if (Files.exists(filePath)) {
+					Files.delete(filePath); // 파일 삭제
+					System.out.println("파일 삭제됨: " + filePath);
+				} else {
+					System.out.println("삭제하려는 파일이 존재하지 않음: " + filePath);
+				}
+			} catch (IOException e) {
+				System.err.println("파일 삭제 중 오류 발생: " + e.getMessage());
+			}
+		}
+
+		// 공지 삭제
 		noticeRepository.deleteById(noticeNo);
 
 		return "isSuccess";
