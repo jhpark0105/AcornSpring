@@ -80,24 +80,24 @@ public class ProductController {
     }
 
     // 소분류 추가 (이미지 업로드 추가)
-    @PostMapping(value = "/product", consumes = {"multipart/form-data"})
+    @PostMapping(value = "/product")
     public Map<String, Object> insertProcess(
             @RequestPart("dto") ProductDto productDto,
             @RequestPart(value = "image", required = false) MultipartFile image) {
         Map<String, Object> response = productProcess.insertProduct(productDto, image);
+
         return response;
     }
 
     // 소분류 수정 (이미지 업로드 추가)
-    @PutMapping(value = "/product/edit/{productCode}", consumes = {"multipart/form-data"})
+    @PutMapping(value = "/product/edit/{productCode}")
     public Map<String, Object> updateProcess(
             @RequestPart("dto") ProductDto productDto,
             @RequestPart(value = "image", required = false) MultipartFile image,
+            @RequestPart(value = "imagePath", required = false) String imagePath,
             @PathVariable("productCode") String productCode) {
-        System.out.println("DTO: " + productDto);
-        System.out.println("Image: " + (image != null ? image.getOriginalFilename() : "No image uploaded"));
+        Map<String, Object> response = productProcess.updateProduct(productDto, image, imagePath);
 
-        Map<String, Object> response = productProcess.updateProduct(productDto, image);
         return response;
     }
 
@@ -105,6 +105,7 @@ public class ProductController {
     @DeleteMapping("/product/{productCode}")
     public Map<String, Object> deleteProcess(@PathVariable("productCode") String productCode) {
         Map<String, Object> response = productProcess.deleteProduct(productCode);
+
         return response;
     }
 }

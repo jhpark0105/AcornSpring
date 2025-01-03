@@ -1,17 +1,11 @@
 package com.erp.process.branch;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,8 +26,8 @@ public class ProductProcess {
 	@Autowired
     private ProductBRepository productBRepository;
 
-	@Value("${file.upload-dir.product}")
-	private String productUploadDir;
+	@Autowired
+	private ImageProcess imageProcess;
 
 	//대분류 목록 조회
 	@Transactional
@@ -157,150 +151,82 @@ public class ProductProcess {
 	       return productBRepository.findAll();
 	}
 
-	// 파일 업로드 메서드
-	private String uploadFile(MultipartFile file) throws IOException {
-		System.out.println("Product Upload Directory in uploadFile: " + productUploadDir);
-
-		if (file == null || file.isEmpty()) {
-			throw new IllegalArgumentException("파일이 비어있습니다.");
-		}
-
-		String imageName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-		Path uploadPath = Paths.get(productUploadDir).toAbsolutePath();
-
-		if (Files.notExists(uploadPath)) {
-			Files.createDirectories(uploadPath);
-		}
-
-		Path filePath = uploadPath.resolve(imageName);
-		Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-
-		return "/uploads/product/" + imageName;
-	}
-
-	//소분류 등록
+	// 소분류 등록
 	@Transactional
 	public Map<String, Object> insertProduct(ProductDto productDto, MultipartFile image) {
-	    Map<String, Object> response = new HashMap<>();
-	    try {
-	        // 상품 코드 확인
-	        if (productRepository.findById(productDto.getProductCode()).isPresent()) {
-				response.put("isSuccess", false);
-				response.put("message", "이미 존재하는 상품입니다.");
-
-				return response;
-			}
-
-	        // productBCode로 Product_B를 조회하여 product_b에 설정
-	        Product_B productB = productBRepository.findProductBOne(productDto.getProductBCode());
-
-			if (productB == null) {
-				response.put("isSuccess", false);
-				response.put("message", "유효하지 않은 대분류 코드입니다.");
-
-				return response;
-			}
+		Map<String, Object> response = new HashMap<>();
+		try {
+			// 대분류 코드로 Product_B 객체를 조회
+			Product_B productB = productBRepository.findById(productDto.getProductBCode())
+					.orElseThrow(() -> new IllegalArgumentException("유효하지 않은 대분류 코드입니다."));
 
 			// 이미지 업로드 처리
-			String uploadedImagePath = null;
-
+			String uploadedImageUrl = null;
 			if (image != null && !image.isEmpty()) {
-				uploadedImagePath = uploadFile(image);
-
-				if (uploadedImagePath == null) {
-					response.put("isSuccess", false);
-					response.put("message", "이미지 업로드 실패: 파일 경로 생성 오류");
-
-					return response;
-				}
+				uploadedImageUrl = imageProcess.uploadImage(image);
 			} else {
 				response.put("isSuccess", false);
-				response.put("message", "상품 이미지를 업로드해주세요.");
-
+				response.put("message", "상품 이미지는 필수입니다.");
 				return response;
 			}
 
-	        // Product 객체 생성 (product_b는 이제 productB로 설정됨)
-	        Product product = new Product(
-	            productDto.getProductCode(),
-	            productDto.getProductName(),
-	            productDto.getProductPrice(),
-	            productDto.getProductEa(),
-				uploadedImagePath, //업로드된 이미지 경로 설정
-	            productB // Product_B 객체 설정
-	        );
+			// Product 객체 생성 및 저장
+			Product product = new Product(
+					productDto.getProductCode(),
+					productDto.getProductName(),
+					productDto.getProductPrice(),
+					productDto.getProductEa(),
+					uploadedImageUrl,
+					productB
+			);
 
-			System.out.println("product : " + product);
+			productRepository.save(product);
 
-	        // 상품 저장
-	        productRepository.save(product);
+			response.put("isSuccess", true);
+			response.put("message", "상품 등록 성공!");
+		} catch (Exception e) {
+			response.put("isSuccess", false);
+			response.put("message", "상품 등록 중 오류: " + e.getMessage());
+		}
 
-	        response.put("isSuccess", true);
-	        response.put("message", "상품 등록 성공!");
-	        
-	        return response;
-	    } catch (Exception e) {
-	        response.put("isSuccess", false);
-	        response.put("message", "입력 자료 오류입니다. " + e.getMessage());
-
-	        return response;
-	    }
+		return response;
 	}
 
 	// 소분류 수정
 	@Transactional
-	public Map<String, Object> updateProduct(ProductDto productDto, MultipartFile image) {
-	    Map<String, Object> response = new HashMap<>();
+	public Map<String, Object> updateProduct(ProductDto productDto, MultipartFile image, String imagePath) {
+		Map<String, Object> response = new HashMap<>();
 
-	    try {
-	        // 소분류 코드가 존재하는지 확인
-	        if (!productRepository.existsById(productDto.getProductCode())) {
-	            response.put("isSuccess", false);
-	            response.put("message", "해당 번호의 데이터가 존재하지 않습니다.");
-	            
-	            return response;
-	        }
+		try {
+			// 상품 존재 여부 확인
+			Product existingProduct = productRepository.findById(productDto.getProductCode())
+					.orElseThrow(() -> new IllegalArgumentException("해당 상품이 존재하지 않습니다."));
 
-	        // 대분류 코드가 존재하는지 확인
-	        Product_B productB = productBRepository.findById(productDto.getProduct_b().getProductBCode()).orElse(null);
-	        if (productB == null) {
-	            response.put("isSuccess", false);
-	            response.put("message", "해당 대분류 코드가 존재하지 않습니다.");
-	            
-	            return response;
-	        }
+			// 이미지 처리
+			String uploadedImageUrl = existingProduct.getProductImagePath(); // 기본값: 기존 이미지 유지
+			if (image != null && !image.isEmpty()) {
+				uploadedImageUrl = imageProcess.uploadImage(image); // 새 이미지 업로드
+			} else if (imagePath != null && !imagePath.isEmpty()) {
+				uploadedImageUrl = imagePath; // 기존 이미지 경로 유지
+			}
 
-	        // 이미지 업로드 처리
-	        String uploadedImagePath = productDto.getProductImagePath(); // 기본 경로는 기존 이미지
-	        if (image != null && !image.isEmpty()) {
-	            uploadedImagePath = uploadFile(image); // 새로운 이미지 업로드
-	        }
+			// 업데이트된 상품 생성
+			existingProduct.setProductName(productDto.getProductName());
+			existingProduct.setProductPrice(productDto.getProductPrice());
+			existingProduct.setProductEa(productDto.getProductEa());
+			existingProduct.setProductImagePath(uploadedImageUrl);
 
-	        // 수정할 상품 객체 생성
-	        Product product = new Product(
-	            productDto.getProductCode(),
-	            productDto.getProductName(),
-	            productDto.getProductPrice(),
-	            productDto.getProductEa(),
-	            uploadedImagePath, //새 이미지 경로 또는 기존 경로 설정
-	            productB
-	        );
-	        
-	        System.out.println("상품 수정 product 사진 : " + uploadedImagePath);
+			productRepository.save(existingProduct);
 
-	        // 상품 저장
-	        productRepository.save(product);
+			response.put("isSuccess", true);
+			response.put("message", "상품 수정 성공!");
+		} catch (Exception e) {
+			e.printStackTrace();
+			response.put("isSuccess", false);
+			response.put("message", "상품 수정 중 오류 발생: " + e.getMessage());
+		}
 
-	        response.put("isSuccess", true);
-	        response.put("message", "소분류 수정 성공!");
-	        
-	        return response;
-	    } catch (Exception e) {
-	        response.put("isSuccess", false);
-	        response.put("message", "수정 중 오류 발생: " + e.getMessage());
-	        
-	        return response;
-	    }
+		return response;
 	}
 
 	// 소분류 삭제
