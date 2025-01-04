@@ -10,7 +10,9 @@ import com.erp.dto.AttendanceDto;
 import com.erp.process.branch.AttendanceProcess;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/attendance")
@@ -79,12 +81,12 @@ public class AttendanceController {
 
     // 근태 수정
     @PutMapping("/update")
-    public ResponseEntity<String> updateAttendance(@RequestBody AttendanceDto attendanceDto) {
+    public ResponseEntity<Map<String, Object>> updateAttendance(@RequestBody AttendanceDto attendanceDto) {
         try {
-            String result = attendanceProcess.update(attendanceDto);
+            Map<String, Object> result = attendanceProcess.update(attendanceDto);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("수정 작업 오류: " + e.getMessage());
+            return ResponseEntity.status(500).body(Collections.singletonMap("message", "수정 작업 오류: " + e.getMessage()));
         }
     }
 

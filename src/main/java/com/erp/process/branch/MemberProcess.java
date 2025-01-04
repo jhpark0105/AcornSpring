@@ -32,7 +32,7 @@ public class MemberProcess {
 		try {
 			repository.findById(dto.getMemberId()).get();
 			response.put("Success", false);
-			response.put("message", "이미 등록된 번호입니다.");
+			response.put("message", "이미 등록된 사번입니다.");
 			
 			return response;
 		} catch(Exception e) {

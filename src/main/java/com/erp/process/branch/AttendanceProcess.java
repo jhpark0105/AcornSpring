@@ -112,7 +112,8 @@ public class AttendanceProcess {
 
     // 근태 기록 수정
     @Transactional
-    public String update(AttendanceDto dto) {
+    public Map<String, Object> update(AttendanceDto dto) {
+        Map<String, Object> response = new HashMap<>();
         try {
             // 기존 데이터 조회
             Attendance existingAttendance = repository.findById(dto.getAttendanceId())
@@ -130,10 +131,13 @@ public class AttendanceProcess {
 
             // 저장
             repository.save(existingAttendance);
-            return "Success";
+            response.put("Success", true);
+            response.put("message", "근태 정보가 수정되었습니다.");
         } catch (Exception e) {
-            throw new RuntimeException("근태 수정 중 오류 발생: " + e.getMessage());
+            response.put("Success", false);
+            response.put("message", "근태 수정 중 오류 발생: " + e.getMessage());
         }
+        return response;
     }
 
     // 근태 기록 삭제

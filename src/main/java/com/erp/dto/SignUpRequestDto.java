@@ -36,7 +36,7 @@ public class SignUpRequestDto {
 	
 	@NotBlank
 	@Email
-	// @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$") @Email 때문에 필요없을 듯, 혹시 몰라 남겨둡니다.
+	//@Pattern(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$") // @Email 때문에 필요없을 듯, 혹시 몰라 남겨둡니다.
 	private String adminEmail;
 	
 	@NotBlank
