@@ -69,19 +69,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
     @Query("UPDATE Reservation r SET r.reservationStatus = 2 WHERE r.reservationNo = :reservationNo")
     int updateReservationStatusTwo(@Param("reservationNo") int reservationNo);
 
-    //예약 등록(insert)
-//    @Modifying
-//    @Query(value = "INSERT INTO Reservation (reservationNo, reservationDate, reservationTime, reservationComm, customerId, serviceCode, memberId) "
-//                 + "VALUES (:reservationNo, :reservationDate, :reservationTime, :reservationComm, :customerName, :serviceName, :memberName)", nativeQuery = true)
-//    void saveReservation(@Param("reservationNo") int reservationNo,
-//                         @Param("reservationDate") String reservationDate,
-//                         @Param("reservationTime") String reservationTime,
-//                         @Param("reservationComm") String reservationComm,
-//                         @Param("customerName")String customerName,
-//                         @Param("serviceName")String serviceName,
-//                         @Param("memberName")String memberName
-//                         );
-
     // 서비스 이용 횟수 증가
     @Modifying
     @Query("UPDATE Service s SET s.serviceCnt = s.serviceCnt + 1 WHERE s.serviceCode = :serviceCode")

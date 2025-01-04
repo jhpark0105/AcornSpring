@@ -9,7 +9,6 @@ import com.erp.entity.Alarm;
 import com.erp.entity.Reservation;
 import com.erp.process.branch.AlarmProcess;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
@@ -55,27 +54,18 @@ public class ReservationController {
 
     //예약 대기 리스트 조회
     @GetMapping("/reservation/confirm")
-//    public List<ReservationDto> getConfirmList() {
-//        return reservationProcess.getReservationsWithStatusZero();
-//    }
     public List<Reservation> getConfirmList() {
         return reservationProcess.getReservationsWithStatusZero();
     }
 
     //예약 완료 리스트 조회
     @GetMapping("/reservation/finish")
-//    public List<ReservationDto> getFinishList() {
-//        return reservationProcess.getReservationsWithStatusOne();
-//    }
     public List<Reservation> getFinishList() {
         return reservationProcess.getReservationsWithStatusOne();
     }
 
     //예약 취소 리스트 조회
     @GetMapping("/reservation/cancel")
-//    public List<ReservationDto> getCancelList() {
-//        return reservationProcess.getReservationsWithStatusTwo();
-//    }
     public List<Reservation> getCancelList() {
         return reservationProcess.getReservationsWithStatusTwo();
     }
@@ -92,8 +82,6 @@ public class ReservationController {
         String reservationDate = reservationDto.getReservationDate();
         String reservationTime = reservationDto.getReservationTime();
 
-//        // 알림 메시지 생성
-//        String alarmContent = customerName + "님의 예약이 등록되었습니다!";
         // 알림 메시지 생성
         String alarmContent = customerName + "님의 예약이 등록되었습니다!\n"
                 + "담당 디자이너: " + memberName + "\n"
@@ -115,13 +103,6 @@ public class ReservationController {
         return map;
     }
 
-    // 예약 삭제
-//    @DeleteMapping("/reservation/{reservationNo}")
-//    public Map<String, Object> deleteData(@PathVariable("reservationNo") int reservationNo) {
-//        reservationProcess.delete(reservationNo);
-//        return Map.of("isSuccess", true);
-//    }
-
     // 예약 수정
     @PutMapping("/reservation/{reservationNo}")
     public Map<String, Object> updateData(@PathVariable("reservationNo") int reservationNo, @RequestBody ReservationDto reservationDto) {
@@ -132,11 +113,6 @@ public class ReservationController {
 
 
     // 예약 완료(확정) 상태 수정
-//    @PutMapping("/reservation/finish/{reservationNo}")
-//    public String reservationFinish(@PathVariable("reservationNo") int reservationNo) {
-//        reservationProcess.reservationFinish(reservationNo);
-//        return "isSuccess";
-//    }
     @PutMapping("/reservation/finish/{reservationNo}")
     public Map<String, Boolean> reservationFinish(@PathVariable("reservationNo") int reservationNo) {
         reservationProcess.reservationFinish(reservationNo);
@@ -148,11 +124,6 @@ public class ReservationController {
     }
 
     // 예약 취소 상태 수정
-//    @PutMapping("/reservation/cancel/{reservationNo}")
-//    public String reservationCancel(@PathVariable("reservationNo") int reservationNo) {
-//        reservationProcess.reservationCancel(reservationNo);
-//        return "isSuccess";
-//    }
     @PutMapping("/reservation/cancel/{reservationNo}")
     public Map<String, Boolean> reservationCancel(@PathVariable("reservationNo") int reservationNo) {
         reservationProcess.reservationCancel(reservationNo);

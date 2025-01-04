@@ -30,7 +30,6 @@ public class ReservationDto {
 	private String serviceCode;
 	private String serviceName;
 	private int servicePrice;
-//	private String branchCode;
 	private Customer customer;
 	private Service service;
 	private Member member;
