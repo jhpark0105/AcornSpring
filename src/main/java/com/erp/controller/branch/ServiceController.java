@@ -65,7 +65,7 @@ public class ServiceController {
         } catch (Exception e) {
             // 예외 발생 시 상세 오류 메시지 반환
             response.put("isSuccess", false);
-            response.put("message", "입력 자료 오류입니다. " + e.getMessage());
+            response.put("message", "모든 필드를 채워주세요." );
             return response; // 오류 메시지 반환
         }
     }
