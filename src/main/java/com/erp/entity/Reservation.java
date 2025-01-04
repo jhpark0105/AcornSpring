@@ -30,8 +30,6 @@ public class Reservation {
 	private String reservationComm;
 	@Column(name="reservation_status")
 	private int reservationStatus;
-//	@Column(name="branch_code")
-//	private String branchCode;
 	
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "customerId")
