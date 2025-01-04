@@ -12,4 +12,5 @@ public interface ServiceRepository extends JpaRepository<Service, String>{
 	List<ServiceDto> findByServiceCode(String serviceCode);
 
 	boolean existsById(String serviceCode);
+	boolean existsByServiceName(String serviceName); // 서비스 이름으로 존재 여부 확인
 }
