@@ -16,7 +16,7 @@ public class CorsConfig implements WebMvcConfigurer {
 		corsRegistry
 		.addMapping("/**") // 모든 경로에 대해 CORS 설정을 적용
 		//.allowedOrigins("*") // 모든 도메인 허용 (보안상 주의 필요)
-		.allowedOrigins("http://localhost:3000") // React의 로컬 서버 주소
+		.allowedOrigins("http://localhost:3000", "http://localhost:3001") // React의 로컬 서버 주소
         .allowedMethods("*") // 허용할 HTTP 메서드, 현재 모든 HTTP 메서드 허용
         .allowedHeaders("*") // 허용할 헤더, 현재 모든 헤더 허용
         .allowCredentials(true); // 인증 정보 포함 요청 허용 (쿠키 등)
