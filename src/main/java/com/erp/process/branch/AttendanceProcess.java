@@ -28,6 +28,7 @@ public class AttendanceProcess {
     @Autowired
     private MemberRepository memberRepository; // MemberRepository 추가
 
+    
     // 전체 근태 목록 조회
     public List<AttendanceDto> getAllList() {
         try {
@@ -82,12 +83,14 @@ public class AttendanceProcess {
                 .anyMatch(attendance -> attendance.getCheckIn() != null);
 
         if (alreadyCheckedIn) {
-            throw new RuntimeException("이미 오늘 출근 기록이 있습니다.");
+            throw new AlreadyCheckedInException("이미 오늘 출근 기록이 있습니다.");
         }
 
+        // 직원 정보 확인
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new RuntimeException("직원을 찾을 수 없습니다."));
+
         Attendance attendance = new Attendance();
-        attendance.setMember(memberRepository.findById(memberId)
-                .orElseThrow(() -> new RuntimeException("직원을 찾을 수 없습니다.")));
         attendance.setAttendanceDate(LocalDate.now());
         attendance.setCheckIn(LocalTime.now());
         attendance.setAttendanceStatus("출근");
@@ -176,4 +179,12 @@ public class AttendanceProcess {
     public List<Attendance> getAllAttendances() {
         return repository.findAll();
     }
+
+    // 커스텀 예외 클래스
+    public static class AlreadyCheckedInException extends RuntimeException {
+        public AlreadyCheckedInException(String message) {
+            super(message);
+        }
+    }
+
 }

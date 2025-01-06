@@ -55,15 +55,35 @@ public class AttendanceController {
     public ResponseEntity<String> checkIn(
             @RequestParam String memberId,
             @RequestParam String password) {
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new RuntimeException("직원을 찾을 수 없습니다."));
 
-        if (!member.getMemberPassword().equals(password)) {
-            return ResponseEntity.badRequest().body("비밀번호가 일치하지 않습니다.");
+        try {
+            // 오늘 날짜에 출근 기록이 있는지 확인
+            boolean alreadyCheckedIn = attendanceProcess.getAttendanceByDate(memberId, LocalDate.now())
+                    .stream()
+                    .anyMatch(attendance -> attendance.getCheckIn() != null);
+
+            if (alreadyCheckedIn) {
+                throw new AlreadyCheckedInException("이미 오늘 출근 기록이 있습니다.");
+            }
+
+            // 직원 정보 확인
+            Member member = memberRepository.findById(memberId)
+                    .orElseThrow(() -> new RuntimeException("직원을 찾을 수 없습니다."));
+
+            // 비밀번호 검증
+            if (!member.getMemberPassword().equals(password)) {
+                return ResponseEntity.badRequest().body("비밀번호가 일치하지 않습니다.");
+            }
+
+            // 출근 처리
+            attendanceProcess.checkIn(memberId);
+            return ResponseEntity.ok("출근 처리 완료");
+
+        } catch (AlreadyCheckedInException ex) {
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(500).body("알 수 없는 오류가 발생했습니다: " + ex.getMessage());
         }
-
-        attendanceProcess.checkIn(memberId);
-        return ResponseEntity.ok("출근 처리 완료");
     }
 
     // 퇴근 처리
@@ -95,4 +115,12 @@ public class AttendanceController {
     public ResponseEntity<String> deleteAttendance(@PathVariable Integer id) {
         return ResponseEntity.ok(attendanceProcess.delete(id));
     }
+
+    public class AlreadyCheckedInException extends RuntimeException {
+        public AlreadyCheckedInException(String message) {
+            super(message);
+        }
+    }
+
 }
+
