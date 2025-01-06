@@ -91,6 +91,7 @@ public class AttendanceProcess {
                 .orElseThrow(() -> new RuntimeException("직원을 찾을 수 없습니다."));
 
         Attendance attendance = new Attendance();
+        attendance.setMember(member); // member 객체 설정
         attendance.setAttendanceDate(LocalDate.now());
         attendance.setCheckIn(LocalTime.now());
         attendance.setAttendanceStatus("출근");
